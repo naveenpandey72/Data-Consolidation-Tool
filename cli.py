@@ -66,8 +66,8 @@ def main():
     print(f"[*] Profiling Master Template: {os.path.basename(args.master)}")
     master_profile = MasterProfile(args.master)
     print(f"    - Sheets detected: {len(master_profile.sheet_names)}")
-    total_inputs = sum(len(c) for c in master_profile.input_cells.values())
-    print(f"    - Input data cells identified: {total_inputs}")
+    total_formulas = sum(len(f) for f in master_profile.formula_cells.values())
+    print(f"    - Master formulas protected: {total_formulas}")
 
     print("\n[*] Processing Regional Files:")
     regional_datasets = []

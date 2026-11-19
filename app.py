@@ -101,7 +101,7 @@ def consolidate():
                 "success": True,
                 "output_filename": "Data_Consolidation_Output.xlsx",
                 "regions_count": len(regional_datasets),
-                "cells_linked": len(active_numeric_cells(mp, regional_datasets)),
+                "cells_linked": len(active_numeric_cells(regional_datasets)),
                 "warnings": val_report.warnings
             })
 
@@ -109,16 +109,13 @@ def consolidate():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-def active_numeric_cells(mp: MasterProfile, regional_datasets):
-    active = []
-    for sname in mp.sheet_names:
-        input_meta = mp.input_cells.get(sname, {})
-        for coord, meta in input_meta.items():
-            if meta.get("is_text"):
-                continue
-            if any(coord in reg.numeric_values.get(sname, {}) for reg in regional_datasets):
-                active.append(coord)
-    return active
+def active_numeric_cells(regional_datasets):
+    active = set()
+    for reg in regional_datasets:
+        for sname, nums in reg.numeric_values.items():
+            for coord in nums.keys():
+                active.add((sname, coord))
+    return list(active)
 
 
 @app.route("/api/download", methods=["GET"])
