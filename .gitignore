@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+*.tmp
+GRI_303_Consolidated_Output.xlsx
+Test_Consolidated_Output.xlsx
+Master_Blank_Template_Consolidated.xlsx
+303_Water_Agra_Shifted.xlsx

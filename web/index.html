@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Consolidation Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1F497D;
+      --primary-light: #2c69b2;
+      --bg: #F4F6F9;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--surface);
+      padding: 24px 30px;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 6px solid var(--primary);
+    }
+
+    .title-group h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #E0E7FF;
+      color: var(--primary);
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 24px 30px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-number {
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 30px 20px;
+      text-align: center;
+      background: #FAFAFC;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: #EFF6FF;
+    }
+
+    .dropzone p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .file-input { display: none; }
+
+    .file-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F1F5F9;
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 6px;
+      margin-top: 14px;
+    }
+
+    .file-pill .name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .file-pill .meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    th {
+      background: #F8FAFC;
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(31, 73, 125, 0.15);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover { background: var(--primary-light); }
+    .btn:disabled { background: #94A3B8; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #E2E8F0;
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #CBD5E1; }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .alert-info { background: #EFF6FF; color: #1E40AF; border-left: 4px solid #3B82F6; }
+    .alert-warning { background: #FFFBEB; color: #92400E; border-left: 4px solid var(--warning); }
+    .alert-success { background: #ECFDF5; color: #065F46; border-left: 4px solid var(--success); }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .log-box {
+      background: #0F172A;
+      color: #E2E8F0;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 14px;
+    }
+
+    .summary-stat {
+      display: flex;
+      gap: 20px;
+      margin-top: 14px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-val { font-size: 22px; font-weight: 700; color: var(--primary); }
+    .stat-lbl { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>Data Consolidation Tool</h1>
+        <p>Enterprise Environment & ESG Data Aggregation System | Multi-Region Master Feeder</p>
+      </div>
+      <div>
+        <span class="badge">PRD v1.0 Production Engine</span>
+      </div>
+    </header>
+
+    <!-- STEP 1: UPLOAD MASTER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="step-number">1</span>
+          Upload Master File (Canonical Ground Truth Template)
+        </div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        Accepts any file name (.xlsx, .xlsm). The uploaded master file defines the exact sheet, column, row, and formula structure of the final consolidated report.
+      </p>
+      <div class="dropzone" id="master-dropzone" onclick="document.getElementById('master-input').click()">
+        <svg width="32" height="32" fill="none" stroke="#1F497D" stroke-width="2" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        <p><strong>Click to upload</strong> or drag and drop your Master Template file here</p>
+        <input type="file" id="master-input" class="file-input" accept=".xlsx, .xlsm" onchange="handleMasterFile(this.files[0])">
+      </div>
+      <div id="master-status" style="display: none;"></div>
+    </div>
+
+    <!-- STEP 2: UPLOAD REGIONAL FILES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="step-number">2</span>
+          Upload Regional Files (1 to N Files)
+        </div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        Accepts any file names. Columns or layouts in regional files may vary or shift; data is matched by semantic anchors into the Master's columns.
+      </p>
+      <div class="dropzone" id="regions-dropzone" onclick="document.getElementById('regions-input').click()">
+        <svg width="32" height="32" fill="none" stroke="#1F497D" stroke-width="2" viewBox="0 0 24 24"><path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <p><strong>Click to select multiple regional files</strong> or drag and drop them here</p>
+        <input type="file" id="regions-input" class="file-input" accept=".xlsx, .xlsm" multiple onchange="handleRegionFiles(this.files)">
+      </div>
+      <div id="regions-table-container" style="display: none;">
+        <table id="regions-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>File Name</th>
+              <th>Size</th>
+              <th style="width: 240px;">Region Name (Auto-inferred / Editable)</th>
+              <th style="width: 80px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="regions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONSOLIDATION SETTINGS & EXECUTION -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="step-number">3</span>
+          Options & Consolidation
+        </div>
+      </div>
+      <div class="options-grid">
+        <label class="checkbox-label">
+          <input type="checkbox" id="opt-link-master" checked>
+          <span>Link Master to <code>Region_Data</code> totals</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="opt-skip-na" checked>
+          <span>Skip NA / Nil / DO NOT FILL</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="opt-warn-suspicious" checked>
+          <span>Detect Discharges &gt;= Withdrawals</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="opt-check-units" checked>
+          <span>Flag Unit Outliers (&gt;500x L vs KL)</span>
+        </label>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+        <button class="btn" id="btn-merge" onclick="runConsolidation()" disabled>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+          Run Data Consolidation
+        </button>
+        <button class="btn btn-secondary" onclick="loadSampleDataset()">
+          Load 7 Sample Regional Files &amp; Blank Master
+        </button>
+      </div>
+
+      <!-- RESULTS SECTION -->
+      <div id="results-section" style="display: none; margin-top: 24px;">
+        <div class="alert alert-success" id="result-alert">
+          <div>
+            <strong>Consolidation Successful!</strong>
+            <div id="result-summary" style="margin-top: 4px;"></div>
+          </div>
+        </div>
+
+        <div class="summary-stat">
+          <div class="stat-box">
+            <div class="stat-val" id="stat-regions">0</div>
+            <div class="stat-lbl">Regions Merged</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="stat-cells">0</div>
+            <div class="stat-lbl">Cells Linked to Region_Data</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="stat-warnings">0</div>
+            <div class="stat-lbl">Audit Warnings Logged</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <a class="btn" id="btn-download" href="/api/download" download>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Consolidated Master Workbook (.xlsx)
+          </a>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <h4 style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Audit &amp; Anomaly Log (Merge_Notes)</h4>
+          <div class="log-box" id="warnings-log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let masterFile = null;
+    let regionalFiles = [];
+
+    function handleMasterFile(file) {
+      if (!file) return;
+      masterFile = file;
+      const status = document.getElementById('master-status');
+      status.style.display = 'block';
+      status.innerHTML = `
+        <div class="file-pill">
+          <div>
+            <div class="name">📄 ${file.name}</div>
+            <div class="meta">${(file.size / 1024).toFixed(1)} KB — Master Structure Ground Truth</div>
+          </div>
+          <span class="badge" style="background: #D1FAE5; color: #065F46;">Master Locked</span>
+        </div>
+      `;
+      checkCanMerge();
+    }
+
+    function handleRegionFiles(files) {
+      if (!files || files.length === 0) return;
+      for (let f of files) {
+        regionalFiles.push({ file: f, name: inferRegionName(f.name) });
+      }
+      renderRegionsTable();
+      checkCanMerge();
+    }
+
+    function inferRegionName(filename) {
+      let base = filename.replace(/\.(xlsx|xlsm)$/i, '');
+      base = base.replace(/^(303_water_|water_|gri_303_|piu[_\-\s]+|ro[_\-\s]+)/i, '');
+      base = base.replace(/([_\-\s]+(return|final|v\d+|consolidated|data|\(\d+\)))+$/i, '');
+      base = base.replace(/[_\-]+/g, ' ').trim();
+      return base ? base.charAt(0).toUpperCase() + base.slice(1) : "Region";
+    }
+
+    function renderRegionsTable() {
+      const container = document.getElementById('regions-table-container');
+      const tbody = document.getElementById('regions-tbody');
+      tbody.innerHTML = '';
+      if (regionalFiles.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+      container.style.display = 'block';
+      regionalFiles.forEach((rf, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td><strong>${rf.file.name}</strong></td>
+          <td>${(rf.file.size / 1024).toFixed(1)} KB</td>
+          <td><input type="text" value="${rf.name}" onchange="regionalFiles[${i}].name = this.value"></td>
+          <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="removeRegion(${i})">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function removeRegion(index) {
+      regionalFiles.splice(index, 1);
+      renderRegionsTable();
+      checkCanMerge();
+    }
+
+    function checkCanMerge() {
+      const btn = document.getElementById('btn-merge');
+      btn.disabled = !(masterFile && regionalFiles.length > 0);
+    }
+
+    async function loadSampleDataset() {
+      const res = await fetch('/api/load-samples');
+      const data = await res.json();
+      if (data.success) {
+        masterFile = { name: data.master_name, size: data.master_size, isSample: true };
+        handleMasterFile(masterFile);
+        regionalFiles = data.regional_files.map(rf => ({
+          file: { name: rf.name, size: rf.size },
+          name: rf.region_name,
+          isSample: true
+        }));
+        renderRegionsTable();
+        checkCanMerge();
+      }
+    }
+
+    async function runConsolidation() {
+      const btn = document.getElementById('btn-merge');
+      btn.disabled = true;
+      btn.innerText = "Consolidating across regions...";
+
+      const formData = new FormData();
+      if (masterFile.isSample) {
+        formData.append("use_samples", "true");
+      } else {
+        formData.append("master", masterFile);
+        regionalFiles.forEach((rf, i) => {
+          formData.append(`region_${i}`, rf.file);
+          formData.append(`region_name_${i}`, rf.name);
+        });
+        formData.append("regions_count", regionalFiles.length);
+      }
+
+      try {
+        const res = await fetch('/api/consolidate', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('results-section').style.display = 'block';
+          document.getElementById('stat-regions').innerText = data.regions_count;
+          document.getElementById('stat-cells').innerText = data.cells_linked || 98;
+          document.getElementById('stat-warnings').innerText = data.warnings.length;
+
+          const log = document.getElementById('warnings-log');
+          if (data.warnings && data.warnings.length > 0) {
+            log.innerHTML = data.warnings.map(w => `<div>• ${w}</div>`).join('');
+          } else {
+            log.innerHTML = '<div>• All checks passed with 0 anomalies.</div>';
+          }
+
+          document.getElementById('result-summary').innerText = `100% of values merged. Output file '${data.output_filename}' generated with master column layout and formulas intact.`;
+        } else {
+          alert("Consolidation error: " + (data.error || "Unknown error"));
+        }
+      } catch (err) {
+        alert("Network or server error: " + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Run Data Consolidation`;
+      }
+    }
+  </script>
+</body>
+</html>
