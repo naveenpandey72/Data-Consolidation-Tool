@@ -16,6 +16,7 @@ from openpyxl.comments import Comment
 from typing import List, Dict, Any, Tuple
 import datetime
 import os
+import re
 
 from core.template_profiler import MasterProfile
 from core.regional_reader import RegionalData
@@ -146,8 +147,12 @@ def consolidate_workbooks(master_profile: MasterProfile, regional_datasets: List
 
             paragraphs = []
             for ans_text, r_names in answers_map.items():
-                tag = f"[{', '.join(sorted(r_names))}]"
-                paragraphs.append(f"{tag} {ans_text}")
+                # Format as 'FileName: Text' without extensions like .xlsx
+                clean_names = [re.sub(r"\.(xlsx|xlsm|xls)$", "", n, flags=re.IGNORECASE).strip() for n in r_names]
+                prefix = ", ".join(sorted(clean_names))
+                # Strip any pre-existing duplicate prefix from source text
+                clean_ans = re.sub(rf"^(\[{re.escape(prefix)}\]|\b{re.escape(prefix)}\b\s*:\s*)", "", ans_text, flags=re.IGNORECASE).strip()
+                paragraphs.append(f"{prefix}: {clean_ans}")
             combined_text = "\n\n".join(paragraphs)
 
             cell = master_ws[coord]
@@ -181,7 +186,9 @@ def consolidate_workbooks(master_profile: MasterProfile, regional_datasets: List
             # Place notes below existing table / rows
             start_row = master_ws.max_row + 1
             for reg_name, note_txt in bareilly_notes:
-                cell = master_ws.cell(row=start_row, column=2, value=f"[{reg_name}] {note_txt}")
+                clean_reg = re.sub(r"\.(xlsx|xlsm|xls)$", "", reg_name, flags=re.IGNORECASE).strip()
+                clean_note = re.sub(rf"^(\[{re.escape(clean_reg)}\]|\b{re.escape(clean_reg)}\b\s*:\s*)", "", note_txt, flags=re.IGNORECASE).strip()
+                cell = master_ws.cell(row=start_row, column=2, value=f"{clean_reg}: {clean_note}")
                 cell.alignment = Alignment(wrap_text=True, vertical="top")
                 master_ws.row_dimensions[start_row].height = 35
                 start_row += 1
@@ -201,7 +208,7 @@ def consolidate_workbooks(master_profile: MasterProfile, regional_datasets: List
 
     notes_intro = [
         "Numeric cells (303-03, 303-04, 303-05 row c, non-compliance counts): sum across all regions. Region-wise values are saved on sheet Region_Data; master cells link to its Total column.",
-        "Text responses & qualitative notes: all regions combined in the same cell, each tagged with [Region]. Identical answers are grouped under one tag.",
+        "Text responses & qualitative notes: all regions combined in the same cell formatted as 'Region/File Name: Text'. Identical answers are grouped.",
         "'NA', 'Nil', 'N/A' and 'DO NOT FILL' entries were excluded from sums and treated as blanks.",
         "Existing master formulas (totals and the 303-05 consumption rows) were preserved and calculate dynamically from merged data. Hard-coded totals in regional files were not copied.",
         "Formulas inside source input cells (e.g. =16000000*2+4567) were evaluated to numeric values before summing.",
